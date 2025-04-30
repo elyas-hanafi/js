@@ -194,3 +194,212 @@ console.log(calcAge2(1995));
 console.log(calcAge3(1995));
 
 // Functions are special types of objects in JavaScript 🔥
+
+///////////////////////
+// 13. Scope in JavaScript (Complete Guide)
+///////////////////////
+
+/*
+Scope = Environment where variables and functions are accessible.
+Three types:
+- Global Scope
+- Function Scope
+- Block Scope
+*/
+
+// Global Scope: Available everywhere
+const globalVar = "I'm global!";
+
+function displayGlobal() {
+  console.log(globalVar); // Accessible here
+}
+displayGlobal();
+
+// Function Scope: Variables inside a function are only accessible there
+function greet() {
+  const message = "Hello inside function!";
+  console.log(message);
+}
+greet();
+// console.log(message); ❌ Error: message is not defined
+
+// Block Scope (let and const)
+{
+  let blockVar = "I exist only inside this block";
+  const anotherBlockVar = "Me too!";
+  console.log(blockVar);
+}
+// console.log(blockVar); ❌ Error
+
+// var is NOT block scoped
+{
+  var notBlockScoped = "I leak outside!";
+}
+console.log(notBlockScoped); // Accessible
+
+// Nested Scope (Scope Chain)
+function outerFunction() {
+  const outerVar = "Outer";
+
+  function innerFunction() {
+    const innerVar = "Inner";
+    console.log(outerVar); // Access parent scope
+    console.log(innerVar);
+  }
+
+  innerFunction();
+}
+outerFunction();
+
+// Lexical Scope: Functions remember the environment where they were created
+
+///////////////////////
+// 14. Strict Mode
+///////////////////////
+
+("use strict"); // Activates strict mode in the whole script
+
+// Helps catch common bugs and prevents silent errors
+// Example: Using undeclared variables
+// x = 3.14; // ❌ ReferenceError in strict mode
+
+function testStrict() {
+  // 'use strict'; // Can be used per-function
+  let y = 10;
+  console.log(y);
+}
+testStrict();
+
+///////////////////////
+// 15. Functions Zero to Hero (Closures, Hoisting, etc.)
+///////////////////////
+
+// Hoisting:
+hoistedFunction(); // ✅ Works due to hoisting
+function hoistedFunction() {
+  console.log("Hoisted Function!");
+}
+
+// Function Expression is not hoisted:
+// unhoisted(); // ❌ Error
+const unhoisted = function () {
+  console.log("This is a function expression");
+};
+
+// Arrow functions are not hoisted
+const arrow = () => console.log("Arrow function");
+
+// Arguments Object (available in regular functions only)
+function showArgs() {
+  console.log(arguments);
+}
+showArgs(1, 2, 3);
+
+// Default Parameters
+function greetUser(name = "Guest") {
+  console.log(`Hello, ${name}`);
+}
+greetUser();
+
+// Rest Parameters
+function sumAll(...nums) {
+  return nums.reduce((acc, cur) => acc + cur, 0);
+}
+console.log(sumAll(1, 2, 3, 4));
+
+// Callback Functions
+function processUserInput(callback) {
+  const name = "User";
+  callback(name);
+}
+processUserInput((n) => console.log(`Welcome ${n}`));
+
+// Closures
+function outer() {
+  let counter = 0;
+  return function () {
+    counter++;
+    console.log(counter);
+  };
+}
+const increment = outer();
+increment();
+increment();
+
+// IIFE (Immediately Invoked Function Expression)
+(function () {
+  console.log("IIFE runs instantly!");
+})();
+
+///////////////////////
+// 16. Arrays (Intro)
+///////////////////////
+
+const friends = ["Michael", "Steven", "Peter"];
+console.log(friends[0]); // Michael
+
+// Arrays can contain any type:
+const mixedArray = ["text", 1991, true, null];
+
+///////////////////////
+// 17. Array Operators (Zero to Hero)
+///////////////////////
+
+const nums = [10, 20, 30];
+
+// Add elements:
+nums.push(40); // add to end
+nums.unshift(0); // add to beginning
+
+// Remove elements:
+nums.pop(); // remove from end
+nums.shift(); // remove from beginning
+
+// Index & Includes:
+console.log(nums.indexOf(20)); // 1
+console.log(nums.includes(30)); // true
+
+// Map, Filter, Reduce
+const doubled = nums.map((n) => n * 2);
+const filtered = nums.filter((n) => n > 10);
+const reduced = nums.reduce((acc, val) => acc + val, 0);
+console.log(doubled, filtered, reduced);
+
+///////////////////////
+// 18. Objects (Basics)
+///////////////////////
+
+const person = {
+  firstName: "Jonas",
+  lastName: "Schmedtmann",
+  age: 30,
+  job: "teacher",
+};
+
+///////////////////////
+// 19. Dot and Bracket Notation
+///////////////////////
+
+console.log(person.firstName); // Jonas
+console.log(person["lastName"]); // Schmedtmann
+
+const key = "job";
+console.log(person[key]); // teacher
+
+///////////////////////
+// 20. Object Methods
+///////////////////////
+
+const student = {
+  firstName: "Sarah",
+  birthYear: 2000,
+  calcAge: function () {
+    return 2025 - this.birthYear;
+  },
+  greet: function () {
+    console.log(`Hi, I'm ${this.firstName}`);
+  },
+};
+
+console.log(student.calcAge()); // 25
+student.greet();
