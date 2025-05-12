@@ -1,0 +1,94 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-fail-webhook"
+      },
+      "id": "1",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const failCheck = items[0].json.conclusion || items[0].json.workflow_run.conclusion;\\nif (failCheck === 'failure') {\\n  return items;\\n} else {\\n  return [];\\n}"
+      },
+      "id": "2",
+      "name": "Check for Failure",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "prompt": "Please summarize the following GitHub Actions error log:\n\n{{ $json[\"workflow_run\"].output }}",
+        "temperature": 0.5
+      },
+      "id": "3",
+      "name": "Summarize Log (GPT)",
+      "type": "n8n-nodes-base.openai",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "your-openai-credentials-id",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "issue",
+        "operation": "create",
+        "project": "DEV",
+        "issuetype": "Bug",
+        "summary": "GitHub Action Failed on {{ $json[\"workflow_run\"].name }}",
+        "description": "A failure occurred in the GitHub Actions pipeline.\n\nSummary:\n{{ $node[\"Summarize Log (GPT)\"].json.choices[0].text }}\n\nLink: {{ $json[\"workflow_run\"].html_url }}"
+      },
+      "id": "4",
+      "name": "Create Jira Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "your-jira-credentials-id",
+          "name": "Jira Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#dev-alerts",
+        "text": "❌ *GitHub Action Failed!*\nWorkflow: {{ $json[\"workflow_run\"].name }}\nSummary: {{ $node[\"Summarize Log (GPT)\"].json.choices[0].text }}\n<{{ $json[\"workflow_run\"].html_url }}|View Workflow> | Jira: {{ $node[\"Create Jira Issue\"].json.key }}"
+      },
+      "id": "5",
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "your-slack-credentials-id",
+          "name": "Slack Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GitHub Webhook": {
+      "main": [[{ "node": "Check for Failure", "type": "main", "index": 0 }]]
+    },
+    "Check for Failure": {
+      "main": [[{ "node": "Summarize Log (GPT)", "type": "main", "index": 0 }]]
+    },
+    "Summarize Log (GPT)": {
+      "main": [[{ "node": "Create Jira Issue", "type": "main", "index": 0 }]]
+    },
+    "Create Jira Issue": {
+      "main": [[{ "node": "Send Slack Alert", "type": "main", "index": 0 }]]
+    }
+  }
+}
